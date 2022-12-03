@@ -1,0 +1,17 @@
+{
+	"name": "DestinationDatasetEmp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServerLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "EmployeeDestination"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

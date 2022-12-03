@@ -1,0 +1,80 @@
+{
+	"name": "EmployeeDepartmentDetails",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Employee",
+						"type": "DatasetReference"
+					},
+					"name": "Employee"
+				},
+				{
+					"dataset": {
+						"referenceName": "Department",
+						"type": "DatasetReference"
+					},
+					"name": "Department"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeDepartmentDetails",
+						"type": "DatasetReference"
+					},
+					"name": "EmployeeDepartmentDetails"
+				}
+			],
+			"transformations": [
+				{
+					"name": "EmpDep"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Id as integer,",
+				"          Name as string,",
+				"          Location as string,",
+				"          DeptID as integer,",
+				"          Salary as decimal(19,4)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> Employee",
+				"source(output(",
+				"          DeptID as integer,",
+				"          DepartmentName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> Department",
+				"Employee, Department join(Employee@DeptID == Department@DeptID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> EmpDep",
+				"EmpDep sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          EmpId = Id,",
+				"          EmpName = Name,",
+				"          EmpLocation = Location,",
+				"          EmpSalary = Salary,",
+				"          EmpDepartmentName = DepartmentName",
+				"     )) ~> EmployeeDepartmentDetails"
+			]
+		}
+	}
+}

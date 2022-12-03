@@ -1,0 +1,9 @@
+{
+	"name": "ADFInstanceSarvotham",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "65f1ba09-52ef-441c-b928-aa8fedf87201",
+		"tenantId": "ea0a5b4b-ebe6-40d4-bc2d-8c233ba8bfef"
+	}
+}

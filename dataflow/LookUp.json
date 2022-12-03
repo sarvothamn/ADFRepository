@@ -1,0 +1,70 @@
+{
+	"name": "LookUp",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DepartmentCSV",
+						"type": "DatasetReference"
+					},
+					"name": "DepartmentFile"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmployeeCSV",
+						"type": "DatasetReference"
+					},
+					"name": "EmployeeFile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "LookUpOutput",
+						"type": "DatasetReference"
+					},
+					"name": "LookupOutputFile"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          DepID as string,",
+				"          DeptName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> DepartmentFile",
+				"source(output(",
+				"          EmpId as string,",
+				"          EmpName as string,",
+				"          Location as string,",
+				"          DepID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> EmployeeFile",
+				"DepartmentFile, EmployeeFile lookup(DepartmentFile@DepID == EmployeeFile@DepID,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Column_1 as string,",
+				"          Column_2 as string",
+				"     ),",
+				"     partitionFileNames:['LookupCSV.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> LookupOutputFile"
+			]
+		}
+	}
+}

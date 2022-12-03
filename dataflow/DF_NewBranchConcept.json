@@ -1,0 +1,99 @@
+{
+	"name": "DF_NewBranchConcept",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeCSV",
+						"type": "DatasetReference"
+					},
+					"name": "SourceEmployee"
+				},
+				{
+					"dataset": {
+						"referenceName": "DepartmentCSV",
+						"type": "DatasetReference"
+					},
+					"name": "DeptTableSource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmpCountByDeptCSV",
+						"type": "DatasetReference"
+					},
+					"name": "TotalEmCountByDept"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmpDeptMattchingCSV",
+						"type": "DatasetReference"
+					},
+					"name": "EmpDeptMattchingCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "EmployeeAggregate1"
+				},
+				{
+					"name": "join1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmpId as string,",
+				"          EmpName as string,",
+				"          Location as string,",
+				"          DepID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> SourceEmployee",
+				"source(output(",
+				"          DepID as string,",
+				"          DeptName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> DeptTableSource",
+				"SourceEmployee aggregate(groupBy(DepID),",
+				"     TotalEmpCountByDept = count(DepID)) ~> EmployeeAggregate1",
+				"SourceEmployee, DeptTableSource join(SourceEmployee@DepID == DeptTableSource@DepID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"EmployeeAggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Column_1 as string,",
+				"          Column_2 as string,",
+				"          Column_3 as string,",
+				"          Column_4 as string,",
+				"          Column_5 as string",
+				"     ),",
+				"     partitionFileNames:['TotalEmpCountByDept.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> TotalEmCountByDept",
+				"join1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Column_1 as string,",
+				"          Column_2 as string,",
+				"          Column_3 as string,",
+				"          Column_4 as string,",
+				"          Column_5 as string",
+				"     ),",
+				"     partitionFileNames:['EmpDeptMattchingCSV.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> EmpDeptMattchingCSV"
+			]
+		}
+	}
+}

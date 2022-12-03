@@ -1,0 +1,40 @@
+{
+	"name": "Json_Employees",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStoragelinkedservice",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Employees1.json",
+				"folderPath": "Input",
+				"container": "adfcontainera"
+			},
+			"encodingName": "UTF-8"
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"employees": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"email": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,77 @@
+{
+	"name": "EmployeeDepartmentCSV",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeCSV",
+						"type": "DatasetReference"
+					},
+					"name": "EmployeeCSV"
+				},
+				{
+					"dataset": {
+						"referenceName": "DepartmentCSV",
+						"type": "DatasetReference"
+					},
+					"name": "DepartmentCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmpTotalCntByDeptCSV",
+						"type": "DatasetReference"
+					},
+					"name": "TotalEmployeesByDeptNameDestinationCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregateEmployeeCSV"
+				},
+				{
+					"name": "AggJoinDepartment"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmpId as string,",
+				"          EmpName as string,",
+				"          Location as string,",
+				"          DepID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> EmployeeCSV",
+				"source(output(",
+				"          DepID as string,",
+				"          DeptName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> DepartmentCSV",
+				"EmployeeCSV aggregate(groupBy(DepID),",
+				"     TotalEmployeesByDepartment = count(EmpId)) ~> aggregateEmployeeCSV",
+				"aggregateEmployeeCSV, DepartmentCSV join(aggregateEmployeeCSV@DepID == DepartmentCSV@DepID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> AggJoinDepartment",
+				"AggJoinDepartment sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['TotalEmpCntByDept.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          EmpCntByDept = TotalEmployeesByDepartment,",
+				"          DeptName",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> TotalEmployeesByDeptNameDestinationCSV"
+			]
+		}
+	}
+}
